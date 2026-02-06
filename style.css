@@ -1,3 +1,59 @@
+/* 定義顏色變數 */
+:root {
+    --bg-color: #f4f4f4;
+    --card-bg: #ffffff;
+    --text-color: #333;
+    --primary-color: #41b883;
+    --header-bg: #35495e;
+}
+
+/* 當 body 有 .dark-mode 類別時，換成深色變數 */
+body.dark-mode {
+    --bg-color: #1a1a1a;
+    --card-bg: #2d2d2d;
+    --text-color: #f4f4f4;
+    --primary-color: #42d392;
+    --header-bg: #111;
+}
+
+/* 使用變數修改原本的樣式 */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background 0.3s, color 0.3s; /* 讓換色有滑順感 */
+}
+
+header { background: var(--header-bg); }
+.post, .sidebar, .publish-area { background: var(--card-bg); }
+
+/* 刪除按鈕樣式 */
+.btn-delete {
+    background: #ff5252;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    float: right;
+    font-size: 0.8rem;
+}
+
+/* 主題切換按鈕樣式 */
+.theme-switch {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+<button class="theme-switch" onclick="toggleTheme()">🌓</button>
+
 /* 基礎設定 */
 body {
     font-family: "Microsoft JhengHei", Arial, sans-serif;
@@ -133,4 +189,20 @@ footer {
     background: #f0f0f0;
     border-radius: 4px;
     border: 1px solid #ccc;
+}
+
+/* 定義動畫效果：透明度從 0 到 1，位置從下方往上移 20px */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 將動畫套用到文章區塊 */
+.post {
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+/* 讓發布區塊也有動畫 */
+.publish-area {
+    animation: fadeIn 0.5s ease-out forwards;
 }

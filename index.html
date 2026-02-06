@@ -9,10 +9,10 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, getDocs, orderBy, query, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
   import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-  // 1. 這裡請保留你原本的 config
+  // 1. 保留你的 config
   const firebaseConfig = {
   apiKey: "AIzaSyDh1mj2ffe0PG5Aje-eVN8-zRzk_6Uq9ss",
   authDomain: "araibu-desuwa.firebaseapp.com",
@@ -27,7 +27,20 @@
   const db = getFirestore(app);
   const storage = getStorage(app);
 
-  // --- 載入文章 (含圖片顯示) ---
+  // --- 主題切換功能 ---
+  window.toggleTheme = function() {
+    document.body.classList.toggle('dark-mode');
+    // 把選擇存起來，下次打開網頁就不用重新選
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', isDark);
+  }
+
+  // 檢查上次存的主題設定
+  if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('dark-mode');
+  }
+
+  // --- 載入文章 (增加刪除按鈕) ---
   async function loadPosts() {
     const postContainer = document.querySelector('.content');
     const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
@@ -37,11 +50,14 @@
     postContainer.innerHTML = '';
     postContainer.appendChild(publishArea);
 
-    querySnapshot.forEach((doc) => {
-      const post = doc.data();
+    querySnapshot.forEach((documentSnapshot) => {
+      const post = documentSnapshot.data();
+      const postId = documentSnapshot.id; // 取得文章 ID 用於刪除
+      
       const postElement = document.createElement('article');
       postElement.className = 'post';
       postElement.innerHTML = `
+        <button class="btn-delete" onclick="deletePost('${postId}')">刪除</button>
         ${post.imageUrl ? `<img src="${post.imageUrl}" style="max-width:100%; border-radius:8px; margin-bottom:15px;">` : ''}
         <h2>${post.title}</h2>
         <p class="meta">${new Date(post.createdAt?.toDate()).toLocaleString()}</p>
@@ -51,38 +67,22 @@
     });
   }
 
-  // --- 發布文章 + 圖片上傳 ---
-  window.addPost = async function() {
-    const title = document.getElementById('post-title').value;
-    const content = document.getElementById('post-content').value;
-    const imageFile = document.getElementById('image-upload').files[0];
-
-    if (!title || !content) return alert("請填寫標題和內容");
-
-    let imageUrl = "";
-
-    try {
-      // 如果有選擇圖片，先上傳圖片到 Storage
-      if (imageFile) {
-        const storageRef = ref(storage, 'images/' + Date.now() + "_" + imageFile.name);
-        const snapshot = await uploadBytes(storageRef, imageFile);
-        imageUrl = await getDownloadURL(snapshot.ref);
+  // --- 刪除文章功能 ---
+  window.deletePost = async function(id) {
+    if (confirm("確定要刪除這篇靈感嗎？")) {
+      try {
+        await deleteDoc(doc(db, "posts", id));
+        alert("刪除成功！");
+        location.reload();
+      } catch (e) {
+        alert("刪除失敗：" + e.message);
       }
-
-      // 將資料存入 Firestore
-      await addDoc(collection(db, "posts"), {
-        title: title,
-        content: content,
-        imageUrl: imageUrl, // 存入圖片網址
-        createdAt: new Date()
-      });
-
-      alert("發布成功！");
-      location.reload();
-    } catch (e) {
-      console.error("錯誤資訊: ", e);
-      alert("發布失敗，請檢查 Firebase Storage 權限");
     }
+  }
+
+  // --- 發布功能 (同之前) ---
+  window.addPost = async function() {
+    /* ... 你原本的 addPost 代碼 ... */
   }
 
   loadPosts();
