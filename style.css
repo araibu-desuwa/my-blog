@@ -1,0 +1,136 @@
+/* 基礎設定 */
+body {
+    font-family: "Microsoft JhengHei", Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+/* 頁首 */
+header {
+    background: #35495e;
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+/* 導覽列 */
+nav {
+    background: #41b883;
+    padding: 0.5rem;
+    text-align: center;
+    position: sticky;
+    top: 0;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: bold;
+}
+
+/* 內容佈局 */
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.content {
+    flex: 3;
+    margin-right: 20px;
+}
+
+.sidebar {
+    flex: 1;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    height: fit-content;
+}
+
+/* 文章樣式 */
+.post {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.meta {
+    font-size: 0.8rem;
+    color: #777;
+}
+
+.read-more {
+    display: inline-block;
+    margin-top: 10px;
+    color: #41b883;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* 頁尾 */
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #333;
+    color: white;
+    margin-top: 20px;
+}
+
+/* 手機版調整 */
+@media (max-width: 768px) {
+    .container { flex-direction: column; }
+    .content { margin-right: 0; }
+}
+
+/* 發布區塊樣式 */
+.publish-area {
+    background: #fff;
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    border: 2px dashed #41b883;
+}
+
+.publish-area input, .publish-area textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* 確保寬度包含 padding */
+}
+
+.btn-submit {
+    background-color: #41b883;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn-submit:hover {
+    background-color: #34a06f;
+}
+
+.upload-box {
+    margin-bottom: 15px;
+}
+
+.custom-file-upload {
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+    background: #f0f0f0;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}

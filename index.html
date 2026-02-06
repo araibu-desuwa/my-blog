@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的個人部落格</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+  // 1. 這裡請保留你原本的 config
+  const firebaseConfig = {
+  apiKey: "AIzaSyDh1mj2ffe0PG5Aje-eVN8-zRzk_6Uq9ss",
+  authDomain: "araibu-desuwa.firebaseapp.com",
+  projectId: "araibu-desuwa",
+  storageBucket: "araibu-desuwa.firebasestorage.app",
+  messagingSenderId: "966349364339",
+  appId: "1:966349364339:web:a68b65d8bf4e87209c5e06",
+  measurementId: "G-F7P56KSMMJ"
+};
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  // --- 載入文章 (含圖片顯示) ---
+  async function loadPosts() {
+    const postContainer = document.querySelector('.content');
+    const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+    const querySnapshot = await getDocs(q);
+    
+    const publishArea = document.querySelector('.publish-area');
+    postContainer.innerHTML = '';
+    postContainer.appendChild(publishArea);
+
+    querySnapshot.forEach((doc) => {
+      const post = doc.data();
+      const postElement = document.createElement('article');
+      postElement.className = 'post';
+      postElement.innerHTML = `
+        ${post.imageUrl ? `<img src="${post.imageUrl}" style="max-width:100%; border-radius:8px; margin-bottom:15px;">` : ''}
+        <h2>${post.title}</h2>
+        <p class="meta">${new Date(post.createdAt?.toDate()).toLocaleString()}</p>
+        <p>${post.content}</p>
+      `;
+      postContainer.appendChild(postElement);
+    });
+  }
+
+  // --- 發布文章 + 圖片上傳 ---
+  window.addPost = async function() {
+    const title = document.getElementById('post-title').value;
+    const content = document.getElementById('post-content').value;
+    const imageFile = document.getElementById('image-upload').files[0];
+
+    if (!title || !content) return alert("請填寫標題和內容");
+
+    let imageUrl = "";
+
+    try {
+      // 如果有選擇圖片，先上傳圖片到 Storage
+      if (imageFile) {
+        const storageRef = ref(storage, 'images/' + Date.now() + "_" + imageFile.name);
+        const snapshot = await uploadBytes(storageRef, imageFile);
+        imageUrl = await getDownloadURL(snapshot.ref);
+      }
+
+      // 將資料存入 Firestore
+      await addDoc(collection(db, "posts"), {
+        title: title,
+        content: content,
+        imageUrl: imageUrl, // 存入圖片網址
+        createdAt: new Date()
+      });
+
+      alert("發布成功！");
+      location.reload();
+    } catch (e) {
+      console.error("錯誤資訊: ", e);
+      alert("發布失敗，請檢查 Firebase Storage 權限");
+    }
+  }
+
+  loadPosts();
+</script>
+
+<body>
+
+    <header>
+        <h1>🌟 探索生活日誌</h1>
+        <p>分享科技、生活與創意的地方</p>
+    </header>
+
+    <nav>
+        <a href="#">首頁</a>
+        <a href="#">關於我</a>
+        <a href="#">文章分類</a>
+        <a href="#">聯絡我們</a>
+    </nav>
+
+<section class="publish-area">
+    <h3>✨ 紀錄新靈感</h3>
+    <input type="text" id="post-title" placeholder="請輸入文章標題...">
+    <textarea id="post-content" rows="4" placeholder="今天有什麼靈感嗎？"></textarea>
+    
+    <div class="upload-box">
+        <label for="image-upload" class="custom-file-upload">
+            📷 上傳靈感圖片
+        </label>
+        <input id="image-upload" type="file" accept="image/*" onchange="previewImage(event)">
+        <img id="preview" src="#" alt="預覽圖片" style="display:none; max-width:100%; margin-top:10px; border-radius:5px;">
+    </div>
+    
+    <button onclick="addPost()" class="btn-submit">發布文章</button>
+</section>
+
+    <div class="container">
+        <main class="content">
+            <article class="post">
+                <h2>如何開始學習網頁設計？</h2>
+                <p class="meta">發布日期：2026年2月6日 | 分類：教學</p>
+                <p>學習網頁設計的第一步是掌握 HTML 和 CSS。這兩者就像是建築物的骨架與裝潢...</p>
+                <a href="#" class="read-more">閱讀全文</a>
+            </article>
+
+            <article class="post">
+                <h2>我的第一篇部落格文章</h2>
+                <p class="meta">發布日期：2026年2月1日 | 分類：隨筆</p>
+                <p>今天終於架設好了我的部落格！這是一個令人興奮的開始...</p>
+                <a href="#" class="read-more">閱讀全文</a>
+            </article>
+        </main>
+
+        <aside class="sidebar">
+            <h3>關於作者</h3>
+            <p>你好！我是 Gemini，熱愛科技與寫作的 AI 助手。</p>
+            <h3>熱門標籤</h3>
+            <ul>
+                <li>#HTML</li>
+                <li>#CSS</li>
+                <li>#生活隨筆</li>
+            </ul>
+        </aside>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 我的部落格. 版權所有.</p>
+    </footer>
+
+</body>
+</html>
